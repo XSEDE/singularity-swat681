@@ -4,9 +4,18 @@ FROM debian:stable-20211011-slim@sha256:edb0a5915350ee6e2fedd8f9d0fe2e7f956f7a58
 #The next two steps install OS-level dependencies
 RUN apt update
 
-RUN apt install -y gcc \
-                   gcc-gfortran \
-                   dos2unix
+#Need to pin these versions down!
+RUN apt install -y gcc-9 \
+                   gfortran-9 \
+                   dos2unix \
+                   unzip \
+                   wget \
+                   make
+
+#Interactive tools for testing - comment/uncomment as needed!
+RUN apt install -y vim \
+                   strace \
+                   lsof 
 
 RUN mkdir /tmp/build/ && \
     mkdir /usr/local/swat681/  
@@ -19,11 +28,13 @@ COPY Makefile /tmp/build/Makefile
 RUN wget -O /tmp/build/rev_681_source.zip https://swat.tamu.edu/media/116557/rev681_source.zip &&  \
     cd /tmp/build && \
     md5sum checksum.txt && \
-    unzip rev681_source.zip 
+    unzip rev_681_source.zip 
+#I do NOT understand why the resultant file from the download has a different name than the request file...
 
-RUN cd /tmp/build/ && \
-    dos2unix * && \
-    make debug64 && \
-    cp swat_debug64 /usr/local/swat681/swat
+#Actual build steps
+#RUN cd /tmp/build/ && \
+#    dos2unix * && \
+#    make debug64 && \
+#    cp swat_debug64 /usr/local/swat681/swat
 
-ENTRYPOINT ["/usr/local/swat681/swat"]
+ENTRYPOINT ["/bin/bash"]
