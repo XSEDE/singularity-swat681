@@ -2,8 +2,8 @@
 #Wednesday, October 17, 2018 11:03:01 AM
 
 #Define compiler
-CC=/opt/ohpc/pub/compiler/gcc/7.3.0/bin/gcc
-FC=/opt/ohpc/pub/compiler/gcc/7.3.0/bin/gfortran
+CC=/usr/bin/gcc-9
+FC=/usr/bin/gfortran-9
 
 #C Flag, remove -Wall if don't want all the warning information
 CFLAG=-c -Wall -fmessage-length=0
