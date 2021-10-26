@@ -1,28 +1,39 @@
 BootStrap: docker
-From: library/debian:stable-20211011-slim@sha256:edb0a5915350ee6e2fedd8f9d0fe2e7f956f7a58f7f41b5e836e0bb7543e48a1
+From: library/debian@sha256:edb0a5915350ee6e2fedd8f9d0fe2e7f956f7a58f7f41b5e836e0bb7543e48a1
 
 %files
 
-  ./checksum.txt /tmp/checksum.txt
-  ./Makefile /tmp/Makefile
+  ./checksum.txt /root/checksum.txt
+  ./Makefile /root/Makefile
+  ./swat_code_mods.patch /root/swat_code_mods.patch
   
 %post
-  mkdir /tmp/build
+  mkdir /root/build
   mkdir /usr/local/swat681
-  mv /tmp/checksum.txt /tmp/Makefile /tmp/build
+  mv /root/checksum.txt /root/Makefile /root/swat_code_mods.patch /root/build
 
   apt update
-  apt install -y gcc \
-                 gcc-gfortran \
-                 dos2unix
+  apt install -y gcc-9 \
+                 gfortran-9 \
+                 dos2unix \
+                 unzip \
+                 wget \
+                 make \
+                 patch
 
-  wget -O /tmp/build/rev_681_source.zip https://swat.tamu.edu/media/116557/rev681_source.zip
-  cd /tmp/build 
+#Interactive tools for testing - comment/uncomment as needed!
+#  apt install -y vim \
+#                 strace \
+#                 lsof 
+
+  wget -O /root/build/rev_681_source.zip https://swat.tamu.edu/media/116557/rev681_source.zip
+  cd /root/build 
   md5sum checksum.txt 
-  unzip rev681_source.zip 
+  unzip rev_681_source.zip 
 
-  cd /tmp/build/
+  cd /root/build/
   dos2unix * 
+  patch -p0 < swat_code_mods.patch 
   make debug64 
   cp swat_debug64 /usr/local/swat681/swat
 
