@@ -7,4 +7,11 @@
 module purge
 module load singularity
 
-singularity run swat.sif
+#cd into the directory containing your data
+cd /data/swat-dir/
+
+#execute SWAT by 
+# 1. temporarily copying the built-in swat binary from the container into the pwd, 
+# 2. running it (inside the container process space), and then 
+# 3. removing it (to avoid confusion)
+singularity exec swat.sif /bin/bash -c "cp /usr/local/swat681/swat ./;./swat;rm ./swat" 
