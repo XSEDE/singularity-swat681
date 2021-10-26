@@ -10,7 +10,8 @@ RUN apt install -y gcc-9 \
                    dos2unix \
                    unzip \
                    wget \
-                   make
+                   make \
+                   patch
 
 #Interactive tools for testing - comment/uncomment as needed!
 RUN apt install -y vim \
@@ -23,7 +24,8 @@ RUN mkdir /tmp/build/ && \
 #  So, we're putting the final binary in an unusual place to avoid mounting problems
 
 COPY ./checksum.txt /tmp/build/checksum.txt
-COPY Makefile /tmp/build/Makefile
+COPY ./Makefile /tmp/build/Makefile
+COPY ./swat_code_mods.patch /tmp/build/swat_code_mods.patch
 
 RUN wget -O /tmp/build/rev_681_source.zip https://swat.tamu.edu/media/116557/rev681_source.zip &&  \
     cd /tmp/build && \
@@ -31,10 +33,19 @@ RUN wget -O /tmp/build/rev_681_source.zip https://swat.tamu.edu/media/116557/rev
     unzip rev_681_source.zip 
 #I do NOT understand why the resultant file from the download has a different name than the request file...
 
-#Actual build steps
-#RUN cd /tmp/build/ && \
-#    dos2unix * && \
-#    make debug64 && \
-#    cp swat_debug64 /usr/local/swat681/swat
+RUN cd /tmp/build/ && \
+    dos2unix * && \
+    patch -p0 < swat_code_mods.patch 
 
-ENTRYPOINT ["/bin/bash"]
+#Actual build steps
+RUN cd /tmp/build/ && \
+    make debug64 && \
+    cp swat_debug64 /usr/local/swat681/swat
+
+##Actual build steps
+#RUN cd /tmp/build/ && \
+#    make rel64 && \
+#    cp swat_rel64 /usr/local/swat681/swat
+
+
+ENTRYPOINT ["/usr/local/swat681/swat"]
