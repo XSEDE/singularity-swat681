@@ -1,0 +1,480 @@
+diff -u ../rev681_clean/atri.f ./atri.f
+--- ../rev681_clean/atri.f	2021-10-20 14:04:15.955991744 +0000
++++ ./atri.f	2021-10-08 05:36:06.495353058 +0000
+@@ -38,8 +38,8 @@
+ !!    SWAT: Aunif
+ 
+ !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
+-
+-      use parm
++      !use parm !Commented by MBS, 6/12/2020 to address the compilation error "Error: 'atri' of module 'parm', imported at (1), is also the name of the current program unit"
++      use parm, ATRI_FROM_MODULE_PARM => atri !Added by MBS, 6/12/2020 to address the compilation error above
+ 
+       real*8, intent (in) :: at1, at2, at3
+       integer, intent (in out) :: at4i
+diff -u ../rev681_clean/bmp_wet_pond.f ./bmp_wet_pond.f
+--- ../rev681_clean/bmp_wet_pond.f	2021-10-20 14:04:15.966991814 +0000
++++ ./bmp_wet_pond.f	2021-10-08 05:36:06.603353746 +0000
+@@ -237,12 +237,17 @@
+       use parm
+       implicit none
+       
+-      real*8,dimension(40) :: cumrain=(/0.,0.006,0.012,0.019,0.026,0.034,
+-     & 0.043,0.053,0.064,0.077,0.092,0.11,0.134,0.166,0.212,0.287,0.384,
+-     & 0.542,0.802,1.262,1.462,1.587,1.688,1.746,1.784,1.811,1.832,
+-     & 1.849,1.863,1.875,1.885,1.894,1.902,1.91,1.917,1.924,1.93,1.93,
++      real*8,dimension(40) :: cumrain=(/0.,0.006,0.012,
++     & 0.019,0.026,0.034,
++     & 0.043,0.053,0.064,0.077,0.092,0.11,0.134,0.166,
++     & 0.212,0.287,0.384,
++     & 0.542,0.802,1.262,1.462,1.587,1.688,1.746,
++     & 1.784,1.811,1.832,
++     & 1.849,1.863,1.875,1.885,1.894,1.902,1.91,
++     & 1.917,1.924,1.93,1.93,
+      & 1.93,1.93/)
+-      real*8 :: ia, ss, plen,inflow,outflow,pndvol,wdth,pndarea,vtmp,hdep
++      real*8 :: ia, ss, plen,inflow,outflow,pndvol
++      real*8 :: wdth,pndarea,vtmp,hdep
+       real*8 :: aa,bb,pdia,hvol,alpha
+       real*8, dimension(40):: fa
+       real*8, intent(out) :: hmax
+diff -u ../rev681_clean/carbon_new.f ./carbon_new.f
+--- ../rev681_clean/carbon_new.f	2021-10-20 14:04:15.970991840 +0000
++++ ./carbon_new.f	2021-10-08 05:36:06.607353772 +0000
+@@ -30,40 +30,40 @@
+       
+       INTERFACE
+       
+-	real*8 Function fwf(fc,wc,pwp)
+-      real*8, intent (in) :: fc, wc, pwp
++      real*8 function fwf(fc,wc,pwp)
++        real*8, intent(in) :: fc, wc, pwp
+       end function
+       
+-      real*8 Function fof(void,por)
+-        real*8, intent (in) :: void, por
++      real*8 function fof(void,por)
++        real*8, intent(in) :: void, por
+       end function
+ 
+-      real*8 Function ftilf(tillage, wc, sat)
+-        real*8, intent (in out) :: tillage
+-        real*8, intent (in) :: wc, sat
+-      End function
++      real*8 function ftilf(tillage, wc, sat)
++        real*8, intent(in out) :: tillage
++        real*8, intent(in) :: wc, sat
++      end function
+ 
+-      real*8 Function fcx(pclay)
+-        real*8, intent (in) :: pclay
+-      End function
++      real*8 function fcx(pclay)
++        real*8, intent(in) :: pclay
++      end function
+ 
+-	real*8 Function fsol_cdec(pcarbon, cx, cfdec, tilf, csf, sol_cmass)
+-        real*8, intent (in) :: pcarbon, cx, cfdec, tilf, csf, sol_cmass
+-	End function
++      real*8 function fsol_cdec(pcarbon,cx,cfdec,tilf,csf,sol_cmass)
++        real*8, intent(in) :: pcarbon,cx,cfdec,tilf,csf,sol_cmass
++      end function
+ 
+-      real*8 Function fCNnew(yy1,yy2,CNpool,yy5)
++      real*8 function fCNnew(yy1,yy2,CNpool,yy5)
+         real*8, intent(in) :: yy1, yy2, CNpool
+         real*8, intent(in) :: yy5
+-      End function
++      end function
+ 
+-	real*8 Function fhc(pclay, pcarbon, cx) 		
+-        real*8, intent(in) :: pclay, pcarbon, cx
+-	End function
++      real*8 function fhc(pclay,pcarbon,cx) 		
++        real*8, intent(in) :: pclay,pcarbon,cx
++      end function
+ 
+-	real*8 Function fnetmin(poold, R1, R2, hc, dummy, poolm, xinorg, cc1)
++      real*8 function fnetmin(poold,R1,R2,hc,dummy,poolm,xinorg,cc1)
+         real*8, intent(in) :: R1, R2, hc, poolm, xinorg, cc1
+         real*8, intent(in out) :: poold, dummy
+-      End function      
++      end function      
+       
+       END INTERFACE
+     
+@@ -125,7 +125,7 @@
+ !!    zero new carbon variables for output.hru
+ 
+ 
+-      if (sol_cbn(1,j) == 0.) return	
++      if(sol_cbn(1,j) == 0.) return	
+  
+       do k = 1, sol_nly(j)
+ 
+@@ -273,14 +273,14 @@
+             !! CN of new organic matter (humified residue)
+             rCNnew = fCNnew(sol_no3(k,j),sol_mass,CNres, 1.1D+02)   ! 110.)
+ 
+-			!! N mineralization / immobilization			
+-			xx1 = sol_rsd(k,j)
+-			xx2 = sol_no3(k,j) + sol_nh3(k,j)
+-			rnet_N = fnetmin(rdc,CNres,rCNnew,rhc,ffres1,xx1,xx2, 4.3D-01)
++            !! N mineralization / immobilization			
++            xx1 = sol_rsd(k,j)
++            xx2 = sol_no3(k,j) + sol_nh3(k,j)
++            rnet_N =fnetmin(rdc,CNres,rCNnew,rhc,ffres1,xx1,xx2,4.3D-01)
+ 
+             !! P mineralization / immobilization
+             xx2 = sol_solp(k,j)
+-            rnet_P = fnetmin(rdc,CPres,CPsoil,rhc,ffres2,xx1,xx2, 4.3D-01)
++            rnet_P =fnetmin(rdc,CPres,CPsoil,rhc,ffres2,xx1,xx2,4.3D-01)
+   
+             !! check if P limits N mineralization and re-adjust
+             if (ffres2 < ffres1) then
+@@ -299,22 +299,22 @@
+             mdc = 0.025 * csf * sol_mc(k,j)
+ 
+             !! humification factor
+-			mhc = 1.6 * fhc(sol_clay(k,j),sol_cbn(k,j),cx)
++		mhc = 1.6 * fhc(sol_clay(k,j),sol_cbn(k,j),cx)
+ 			
+-			CNman = sol_mc(k,j) / sol_mn(k,j)
+-			CPman = sol_mc(k,j) / sol_mp(k,j)
++		CNman = sol_mc(k,j) / sol_mn(k,j)
++		CPman = sol_mc(k,j) / sol_mp(k,j)
+ 			
+-			!! CN of new organic matter (humified manure)
+-			mCNnew = fCNnew(sol_no3(k,j),sol_mass,CNman, 5.5D+01)
++		!! CN of new organic matter (humified manure)
++		mCNnew = fCNnew(sol_no3(k,j),sol_mass,CNman, 5.5D+01)
+ 
+-			!! N mineralization / immobilization			
+-			xx1 = sol_mc(k,j)
+-			xx2 = sol_no3(k,j) + sol_nh3(k,j)
+-			mnet_N = fnetmin(mdc,CNman,mCNnew,mhc,ffman1,xx1,xx2,1.0D+00)
++		!! N mineralization / immobilization			
++		xx1 = sol_mc(k,j)
++		xx2 = sol_no3(k,j) + sol_nh3(k,j)
++		mnet_N =fnetmin(mdc,CNman,mCNnew,mhc,ffman1,xx1,xx2,1.0D+00)
+ 
+             !! P mineralization / immobilization
+             xx2 = sol_solp(k,j)
+-            mnet_P = fnetmin(mdc,CPman,CPsoil,mhc,ffman2,xx1,xx2,1.0D+00)
++            mnet_P =fnetmin(mdc,CPman,CPsoil,mhc,ffman2,xx1,xx2,1.0D+00)
+   
+             !! check if P or N limit mineralization and re-adjust
+             if (ffman2 < ffman1) then
+@@ -326,8 +326,8 @@
+         end if
+ 
+         !! check if sufficient mineral N for both residue and manure decomposition
+-		if ((sol_no3(k,j) + sol_nh3(k,j)) > 0.) then
+-			xx = (rnet_N + mnet_N) / (sol_no3(k,j) + sol_nh3(k,j))
++            if ((sol_no3(k,j) + sol_nh3(k,j)) > 0.) then
++		xx = (rnet_N + mnet_N) / (sol_no3(k,j) + sol_nh3(k,j))
+             if (xx < -1.) then
+                 rdc = -rdc / xx
+                 rnet_N = -rnet_N / xx
+@@ -493,7 +493,7 @@
+ 
+ !9000  format(i4,';',i3,';',i1,';',i4,20(';',f10.3))
+ !9001  format(i4,';',i3,';',i1,';',i4,10(';',f10.3))
+-9002  format(i4,';',i3,';',i4,';',f11.3,';',f11.3,';',f11.3)
++ 9002  format(i4,';',i3,';',i4,';',f11.3,';',f11.3,';',f11.3)
+ 
+       return
+       end subroutine
+@@ -555,10 +555,11 @@
+       End function
+ 
+ 
+-	real*8 Function fsol_cdec(pcarbon, cx, cfdec, tilf, csf, sol_cmass)
+-        real*8, intent (in) :: pcarbon, cx, cfdec, tilf, csf, sol_cmass
++	real*8 Function fsol_cdec(pcarbon, cx, cfdec, tilf, 
++     & csf, sol_cmass)
++      real*8, intent (in) :: pcarbon, cx, cfdec, tilf, csf, sol_cmass
+ 		!! decomposition adjustment by current SOC 
+-		decf = (pcarbon / cx) ** 0.5	
++		    decf = (pcarbon / cx) ** 0.5	
+ 		! if (decf > 1.) decf = 1. 
+ 		!! maximum soil carbon decomposition = 0.045 kg C / kg C per year
+ 		fsol_cdec = cfdec / 365. * decf * tilf * csf * sol_cmass
+@@ -605,7 +606,7 @@
+ 		fhc = hx * hf		  
+ 	End function
+ 
+-	real*8 Function fnetmin(poold, R1, R2, hc, dummy, poolm, xinorg, cc1)
++	real*8 Function fnetmin(poold,R1,R2,hc,dummy,poolm,xinorg,cc1)
+ 	!! This function computes net mineralization
+ 	!! R1 = CN or CP ratio of decomposing pool
+ 	!! R2 = CN or CP ratio of receiving pool
+Only in ./: debug64
+diff -u ../rev681_clean/distrib_bmps.f ./distrib_bmps.f
+--- ../rev681_clean/distrib_bmps.f	2021-10-20 14:04:15.981991910 +0000
++++ ./distrib_bmps.f	2021-10-08 05:36:06.620353855 +0000
+@@ -36,7 +36,8 @@
+       
+       integer :: kk,sb,ii
+       real*8 :: sub_ha,bmpfr
+-      real*8, dimension(4,0:nstep) :: sf_totalflw,sf_totaltss,ri_totalflw
++      real*8, dimension(4,0:nstep) :: sf_totalflw,sf_totaltss
++      real*8, dimension(4,0:nstep) :: ri_totalflw
+       real*8, dimension(4,0:nstep) :: ri_totaltss
+       real*8, dimension(4,0:nstep) :: sfflw,sfsed,riflw,rised !dimensions: 1=inflow/outflow, 2=pond id, 3=time step
+       real*8, dimension(4,0:nstep) :: spqm3,spsed,ftqm3,ftsed,riqm3
+diff -u ../rev681_clean/HQDAV.f90 ./HQDAV.f90
+--- ../rev681_clean/HQDAV.f90	2021-10-20 14:04:16.007992076 +0000
++++ ./HQDAV.f90	2021-10-08 05:36:06.650354046 +0000
+@@ -2,7 +2,7 @@
+ !     adopted from APEX1501 by Jaehak Jeong 2017
+ !     THIS SUBPROGRAM COMPUTES FLOW AREA AND DEPTH GIVEN RATE in a reach
+     
+-      USE PARM
++      USE PARM, HQDAV_FROM_MODULE_PARM => HQDAV !Added by MBS, 6/12/2020 to address the compilation error "'hqdav' of module 'parm', imported at (1), is also the name of the current program unit"
+       
+       real*8, intent (in out) :: A, ZX, CHW, FPW
+       real*8, intent (in) :: CBW, QQ, SSS, ZCH
+diff -u ../rev681_clean/layersplit.f ./layersplit.f
+--- ../rev681_clean/layersplit.f	2021-10-20 14:04:16.024992185 +0000
++++ ./layersplit.f	2021-10-08 05:36:06.671354180 +0000
+@@ -1,6 +1,7 @@
+       subroutine layersplit(dep_new)
+ 
+-      use parm
++      use parm , LAYERSPLIT_FROM_MODULE_PARM => layersplit !Added by MBS, 6/12/2020 to address the compilation error "'layersplit' of module 'parm', imported at (1), is also the name of the current program unit"
++      
+       integer nly,n,j
+ 	integer :: flag
+ 	real*8, intent(in):: dep_new
+diff -u ../rev681_clean/modparm.f ./modparm.f
+--- ../rev681_clean/modparm.f	2021-10-20 14:04:16.040992287 +0000
++++ ./modparm.f	2021-10-08 05:36:06.686354275 +0000
+@@ -662,7 +662,7 @@
+ !!    adding qtile to output.hru write 3/2/2010 gsm  increased heds(70) to heds(71)
+       character(len=13) :: heds(79),hedb(24),hedr(46),hedrsv(41)
+       character(len=13) :: hedwtr(40)
+-      character(len=4) :: title(60), cpnm(5000)
++      character(len=4) :: title(60), cpnm(9000)
+       character(len=17), dimension(50) :: fname
+ ! measured input files
+       real*8, dimension (:,:,:), allocatable :: flomon,solpstmon,srbpstmon
+diff -u ../rev681_clean/ndenit.f ./ndenit.f
+--- ../rev681_clean/ndenit.f	2021-10-20 14:04:16.041992293 +0000
++++ ./ndenit.f	2021-10-08 05:36:06.688354288 +0000
+@@ -1,13 +1,14 @@
+       subroutine ndenit(k,j,cdg,wdn,void)
+ !!    this subroutine computes denitrification 
+ 
+-	use parm
++	use parm, NDENIT_FROM_MODULE_PARM => ndenit !Added by MBS, 6/12/2020 to address the compilation error "'ndenit' of module 'parm', imported at (1), is also the name of the current program unit"
++      
+ 	integer :: k,j
+ 	real*8 :: cdg, wdn, void
+ 
+       wdn = 0.
+-	vof = 1. / (1. + (void/0.04)**5)
+-	wdn = sol_no3(k,j) * (1. - Exp(-cdn(j) * cdg * vof * sol_cbn(k,j)))
++	vof = 1./(1.+(void/0.04)**5)
++	wdn =sol_no3(k,j)*(1.-Exp(-cdn(j)*cdg*vof*sol_cbn(k,j)))
+ 	sol_no3(k,j) = sol_no3(k,j) - wdn
+ 
+ 	return
+diff -u ../rev681_clean/nminrl.f ./nminrl.f
+--- ../rev681_clean/nminrl.f	2021-10-20 14:04:16.045992319 +0000
++++ ./nminrl.f	2021-10-08 05:36:06.692354314 +0000
+@@ -302,7 +302,7 @@
+         wdn = 0.   
+ 	  if (i_sep(j) /= k .or. isep_opt(j) /= 1) then
+ 	    if (sut >= sdnco(j)) then
+-	      wdn = sol_no3(k,j) * (1. - Exp(-cdn(j) * cdg * sol_cbn(k,j)))
++	      wdn=sol_no3(k,j)*(1.-Exp(-cdn(j)*cdg*sol_cbn(k,j)))
+ 	    else
+ 	      wdn = 0.
+ 	    endif
+diff -u ../rev681_clean/pgenhr.f ./pgenhr.f
+--- ../rev681_clean/pgenhr.f	2021-10-20 14:04:16.056992389 +0000
++++ ./pgenhr.f	2021-10-08 05:36:06.705354396 +0000
+@@ -140,7 +140,7 @@
+         if (pt >= Int(rtp)) exit
+         rx = 0.
+         rx = pkrain - pkrr * xkp1 *                                     
+-     &                       (1. - Exp((dfloat(pt) - rtp) / (60. * xkp1)))
++     &   (1. - Exp((dfloat(pt) - rtp) / (60. * xkp1)))
+         rainsub(jj,itime) = rx - sumrain
+         pt = pt + idt
+         itime = itime + 1
+@@ -154,7 +154,7 @@
+         if (pt >= Int(dur * 60.)) exit
+         rx = 0.
+         rx = pkrain + pkrr * xkp2 *                                     
+-     &                       (1. - Exp((rtp - dfloat(pt)) / (60. * xkp2)))
++     &   (1. - Exp((rtp - dfloat(pt)) / (60. * xkp2)))
+         rainsub(jj,itime) = rx - sumrain
+         pt = pt + idt
+         itime = itime + 1
+diff -u ../rev681_clean/pothole.f ./pothole.f
+--- ../rev681_clean/pothole.f	2021-10-20 14:04:16.064992440 +0000
++++ ./pothole.f	2021-10-08 05:36:06.712354441 +0000
+@@ -168,8 +168,8 @@
+       integer :: j, ly
+       real*8 :: potsep, sumo, potev, cnv, potpcp, no3in, qdayi
+       real*8 :: sedloss, no3loss, yy, dg, excess, stmax, sedsetl
+-	real*8 :: sanloss, silloss, claloss, sagloss, lagloss
+-      real*8 :: potmm,minpsloss,minpaloss, solploss, orgnloss, orgploss, rto
++      real*8 :: sanloss, silloss, claloss, sagloss, lagloss
++      real*8 :: potmm,minpsloss,minpaloss, solploss,orgnloss,orgploss,rto
+ 
+       j = 0
+       j = ihru
+diff -u ../rev681_clean/potholehr.f ./potholehr.f
+--- ../rev681_clean/potholehr.f	2021-10-20 14:04:16.065992447 +0000
++++ ./potholehr.f	2021-10-08 05:36:06.713354447 +0000
+@@ -170,8 +170,9 @@
+       integer :: j, ly,kk,ll,k
+       real*8 :: potsep, sumo, potev, cnv, potpcp, spillo,no3in
+       real*8 :: sedloss, no3loss, yy, dg, excess, stmax, sedsetl
+-	  real*8 :: sanloss, silloss, claloss, sagloss, lagloss, xx
+-      real*8 :: potmm,minpsloss,minpaloss, solploss, orgnloss, orgploss, rto
++      real*8 :: sanloss, silloss, claloss, sagloss, lagloss, xx
++      real*8 :: potmm,minpsloss,minpaloss
++      real*8 :: solploss, orgnloss, orgploss, rto
+       j = 0
+       j = ihru
+ 
+diff -u ../rev681_clean/readbsn.f ./readbsn.f
+--- ../rev681_clean/readbsn.f	2021-10-20 14:04:16.074992504 +0000
++++ ./readbsn.f	2021-10-22 18:11:32.730442921 +0000
+@@ -733,8 +733,8 @@
+       
+       if (cswat == 1) then
+ 	 open (100,file="cswat_profile.txt",recl=280)
+-	 write (100,*) 'year',';','day',';','hru',';','cmass',';','sol_rsd',
+-     & ';','mancmass'
++	 write (100,*) 'year',';','day',';','hru',';','cmass',';',
++     & 'sol_rsd',';','mancmass'
+       end if
+ 
+        !!add by zhang
+@@ -773,4 +773,4 @@
+  1001 format (i4)
+  5102 format (3a5,30a15)
+  5104 format (a4,a4,a8,48a16)
+-      end
+\ No newline at end of file
++      end
+diff -u ../rev681_clean/recmon.f ./recmon.f
+--- ../rev681_clean/recmon.f	2021-10-20 14:04:16.100992670 +0000
++++ ./recmon.f	2021-10-08 05:36:06.750354683 +0000
+@@ -153,18 +153,30 @@
+       hhvaroute(5,ihout,ii) = orgpmon(inum1,curyr,i_mo) / dfloat(nstep)
+       hhvaroute(6,ihout,ii) = no3mon(inum1,curyr,i_mo) / dfloat(nstep)
+       hhvaroute(7,ihout,ii) = minpmon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(11,ihout,ii) = solpstmon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(12,ihout,ii) = srbpstmon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(13,ihout,ii) = chlamon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(14,ihout,ii) = nh3mon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(15,ihout,ii) = no2mon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(16,ihout,ii) = cbodmon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(17,ihout,ii) = disoxmon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(18,ihout,ii) = bactpmon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(19,ihout,ii) = bactlpmon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(20,ihout,ii) = cmtl1mon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(21,ihout,ii) = cmtl2mon(inum1,curyr,i_mo) / dfloat(nstep)
+-      hhvaroute(22,ihout,ii) = cmtl3mon(inum1,curyr,i_mo) / dfloat(nstep)
++      hhvaroute(11,ihout,ii) = solpstmon(inum1,curyr,i_mo) 
++     &    / dfloat(nstep)
++      hhvaroute(12,ihout,ii) = srbpstmon(inum1,curyr,i_mo) 
++     &    / dfloat(nstep)
++      hhvaroute(13,ihout,ii) = chlamon(inum1,curyr,i_mo) 
++     &    / dfloat(nstep)
++      hhvaroute(14,ihout,ii) = nh3mon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
++      hhvaroute(15,ihout,ii) = no2mon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
++      hhvaroute(16,ihout,ii) = cbodmon(inum1,curyr,i_mo)
++     &   / dfloat(nstep)
++      hhvaroute(17,ihout,ii) = disoxmon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
++      hhvaroute(18,ihout,ii) = bactpmon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
++      hhvaroute(19,ihout,ii) = bactlpmon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
++      hhvaroute(20,ihout,ii) = cmtl1mon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
++      hhvaroute(21,ihout,ii) = cmtl2mon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
++      hhvaroute(22,ihout,ii) = cmtl3mon(inum1,curyr,i_mo)
++     &    / dfloat(nstep)
+       end do
+       end if
+ 
+diff -u ../rev681_clean/regres.f ./regres.f
+--- ../rev681_clean/regres.f	2021-10-20 14:04:16.101992676 +0000
++++ ./regres.f	2021-10-08 05:36:06.751354690 +0000
+@@ -50,7 +50,8 @@
+ 
+ !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
+ 
+-      use parm
++      use parm, REGRES_FROM_MODULE_PARM => regres !Added by MBS, 6/12/2020 to address the compilation error "'regres' of module 'parm', imported at (1), is also the name of the current program unit"
++      
+ 
+       integer, intent (in) :: k
+       real*8, dimension (5,3) :: beta
+Only in ../rev681_clean/: rev681_source.zip
+diff -u ../rev681_clean/rsedaa.f ./rsedaa.f
+--- ../rev681_clean/rsedaa.f	2021-10-20 14:04:16.110992734 +0000
++++ ./rsedaa.f	2021-10-08 05:36:06.762354760 +0000
+@@ -24,7 +24,8 @@
+ 
+ !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
+ 
+-      use parm
++      use parm, RSEDAA_FROM_MODULE_PARM => rsedaa !Added by MBS, 6/12/2020 to address the compilation error "'rsedaa' of module 'parm', imported at (1), is also the name of the current program unit"
++      
+ 
+       real*8, intent (in) :: years
+       integer :: j
+Only in ./: rthr.f
+Only in ./: swat_code_mods.patch
+Only in ./: swat_debug64
+diff -u ../rev681_clean/tair.f ./tair.f
+--- ../rev681_clean/tair.f	2021-10-20 14:04:16.149992983 +0000
++++ ./tair.f	2021-10-08 05:36:06.960356023 +0000
+@@ -37,7 +37,8 @@
+ !!    Hydrology-Vrije Universiteit Brussel, Belgium
+ !!    subroutine modified by SLN
+ 
+-      use parm
++      use parm, TAIR_FROM_MODULE_PARM => tair !Added by MBS, 6/12/2020 to address the compilation error "'tair' of module 'parm', imported at (1), is also the name of the current program unit"
++      
+        
+       integer, intent (in) ::  jj
+       real*8, intent(in) :: hr
+diff -u ../rev681_clean/vbl.f ./vbl.f
+--- ../rev681_clean/vbl.f	2021-10-20 14:04:16.157993034 +0000
++++ ./vbl.f	2021-10-08 05:36:06.972356098 +0000
+@@ -50,7 +50,8 @@
+ 
+ !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
+ 
+-      use parm
++      use parm, VBL_FROM_MODULE_PARM => vbl !Added by MBS, 6/12/2020 to address the compilation error "'vbl' of module 'parm', imported at (1), is also the name of the current program unit"
++      
+ 
+       real*8, intent (in) :: evx, spx, pp, qin, ox, yi, yo, ysx
+       real*8, intent (in) :: vf, vyf, aha
+diff -u ../rev681_clean/virtual.f ./virtual.f
+--- ../rev681_clean/virtual.f	2021-10-20 14:04:16.159993047 +0000
++++ ./virtual.f	2021-10-08 05:36:06.974356111 +0000
+@@ -262,7 +262,8 @@
+ 
+       integer :: j, sb, kk, ii
+       real*8 :: cnv, sub_ha, wtmp, baseflw, bf_fr,hr
+-      real*8 :: sub_hwyld(nstep), hqd(4*nstep), hsd(4*nstep),hqdtst(nstep)   ! hqd, hsd locally defined. J.Jeong 4/26/2009
++      real*8 :: sub_hwyld(nstep), hqd(4*nstep)   ! hqd, hsd locally defined. J.Jeong 4/26/2009
++      real*8 :: hsd(4*nstep),hqdtst(nstep) 
+ 
+       j = ihru
+       sb = inum1
